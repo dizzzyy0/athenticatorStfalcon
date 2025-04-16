@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Scheb\TwoFactorBundle\Model\Totp\TotpConfiguration;
+use Scheb\TwoFactorBundle\Model\Totp\TotpConfigurationInterface;
 use Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Scheb\TwoFactorBundle\Model\Totp\TotpConfiguration;
-use Scheb\TwoFactorBundle\Model\Totp\TotpConfigurationInterface;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -17,25 +19,23 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFactorInterface
 {
-    public function __construct()
-    {
-        $this->roles = ['ROLE_USER'];
-    }
-
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
-    protected ?Uuid $id = null;
+    protected Uuid $id;
 
     #[ORM\Column(length: 180)]
-    private ?string $email = null;
+    /**
+     * @var non-empty-string
+     */
+    private string $email;
 
     /**
      * @var list<string> The user roles
      */
     #[ORM\Column]
-    private array $roles = [];
+    private array $roles = ['ROLE_USER'];
 
     /**
      * @var string The hashed password
@@ -46,12 +46,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     #[ORM\Column(type: 'string', nullable: true)]
     private ?string $secretKey;
 
-    public function getId(): ?Uuid
+    public function getId(): Uuid
     {
         return $this->id;
     }
 
-    public function getEmail(): ?string
+    public function getEmail(): string
     {
         return $this->email;
     }
@@ -70,7 +70,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
      */
     public function getUserIdentifier(): string
     {
-        return (string) $this->email;
+        assert(trim($this->email) !== '');
+        return $this->email !== '' && $this->email !== '0' ? $this->email : 'not.valid@email.com';
     }
 
     /**
@@ -84,7 +85,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
         // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
 
-        return array_unique($roles);
+        return array_values(array_unique($roles));
     }
 
     /**
@@ -126,7 +127,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
         return $this->secretKey;
     }
 
-    public function setSecretKey(string $secretKey): self
+    public function setSecretKey(?string  $secretKey): self
     {
         $this->secretKey = $secretKey;
         return $this;
@@ -134,7 +135,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
 
     public function isTotpAuthenticationEnabled(): bool
     {
-        return (bool)$this->secretKey;
+        return (bool) $this->secretKey;
     }
 
     public function getTotpAuthenticationUsername(): string
@@ -144,6 +145,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
 
     public function getTotpAuthenticationConfiguration(): ?TotpConfigurationInterface
     {
-        return new TotpConfiguration($this->secretKey, TotpConfiguration::ALGORITHM_SHA1, 30, 6);
+        return new TotpConfiguration(
+            $this->secretKey ?? throw new \RuntimeException('Secret key is not configured'),
+            TotpConfiguration::ALGORITHM_SHA1,
+            30,
+            6
+        );
     }
 }

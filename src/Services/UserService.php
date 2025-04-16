@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services;
@@ -11,19 +12,23 @@ use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticatorInte
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Uid\Uuid;
 
-readonly class  UserService
+readonly class UserService
 {
+
     public function __construct(
         private UserRepository $userRepository,
         private UserPasswordHasherInterface $passwordHasher,
         private EntityManagerInterface $entityManager,
         private TotpAuthenticatorInterface $totpAuthenticator,
-    ){}
+    ) {
+    }
 
-    public function register(RegisterDTO $registerDTO):User
+    public function register(RegisterDTO $registerDTO): User
     {
-        $existingUser = $this->userRepository->findOneBy(['email' => $registerDTO->email]);
-        if($existingUser){
+        $existingUser = $this->userRepository->findOneBy([
+            'email' => $registerDTO->email,
+        ]);
+        if ($existingUser) {
             throw new \Exception(sprintf('User with email %s already exists', $registerDTO->email));
         }
 
@@ -37,35 +42,47 @@ readonly class  UserService
         return $user;
     }
 
-    public function getAllUsers(): array
+    public function getById(Uuid $userId): User
     {
-        return $this->userRepository->findAll();
-    }
-
-    public function getById(Uuid $userId): User{
         $user = $this->userRepository->find($userId);
-        if(!$user){
+        if (! $user) {
             throw new \Exception(sprintf('User with id %s does not exists', $userId));
         }
         return $user;
     }
 
-    public function createSecretForUser(Uuid $userId): User{
+    public function enableTwoFactorAuthentication(Uuid $userId, string $password): bool
+    {
         $user = $this->getById($userId);
+        $isValidPassword = $this->passwordHasher->isPasswordValid($user, $password);
+        if (! $isValidPassword) {
+            return false;
+        }
+
         $user->setSecretKey($this->totpAuthenticator->generateSecret());
         $this->entityManager->persist($user);
         $this->entityManager->flush();
-        return $user;
+
+        return true;
     }
 
-    public function getSecretForUser(Uuid $userId): string
+    public function disableTwoFactorAuthentication(Uuid $userId, string $password): bool
     {
         $user = $this->getById($userId);
-        return $user->getSecretKey();
+        $isValidPassword = $this->passwordHasher->isPasswordValid($user, $password);
+        if (! $isValidPassword){
+            return false;
+        }
+
+        $user->setSecretKey(null);
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+        return true;
     }
 
-    public function verifySecretForUser(Uuid $userId, string $secretKey): bool{
-        $user = $this->getById($userId);
-        return $this->totpAuthenticator->checkCode($user, $secretKey);
+    public function getUserQrCodeData(Uuid $uuid): string
+    {
+        $user = $this->getById($uuid);
+        return $this->totpAuthenticator->getQRContent($user);
     }
 }

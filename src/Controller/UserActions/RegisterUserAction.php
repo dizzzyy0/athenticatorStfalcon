@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller\UserActions;
@@ -16,17 +17,23 @@ class RegisterUserAction extends AbstractController
 {
     public function __construct(
         private readonly UserService $userService,
-    ){}
+    ) {
+    }
+
     #[Route(path: '/auth/register', name: 'register')]
-    public function register(): Response{
+    public function register(): Response
+    {
         return $this->render('auth/register.html.twig');
     }
 
-    #[Route('/auth/register/process', name: 'registerProcess', methods: ['POST'])]
+    #[Route('/auth/register/process', name: 'register-process', methods: ['POST'])]
     public function registerProcess(Request $request, HttpClientInterface $httpClient): Response
     {
+        /** @var string $email */
         $email = $request->request->get('email');
+        /** @var string $password */
         $password = $request->request->get('password');
+        /** @var string $passwordConfirm */
         $passwordConfirm = $request->request->get('passwordConfirm');
 
         if ($password !== $passwordConfirm) {
@@ -41,12 +48,17 @@ class RegisterUserAction extends AbstractController
             return $this->redirectToRoute('login');
 
         } catch (ClientExceptionInterface $e) {
+
             $error = json_decode($e->getResponse()->getContent(false), true);
-            $message = $error['message'] ?? 'Error during registration';
+
+            $message = is_array($error) && isset($error['message']) ? $error['message'] : 'Error during registration';
+
             $this->addFlash('error', $message);
+
             return $this->redirectToRoute('register');
         } catch (\Exception $e) {
             $this->addFlash('error', 'Undefined error');
+
             return $this->redirectToRoute('register');
         }
     }

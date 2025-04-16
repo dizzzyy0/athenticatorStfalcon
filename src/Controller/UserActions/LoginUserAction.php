@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller\UserActions;
@@ -30,7 +31,7 @@ class LoginUserAction extends AbstractController
         return $this->render('main.html.twig');
     }
 
-    #[Route(path: '/logout', name: 'appLogout')]
+    #[Route(path: '/logout', name: 'app-logout')]
     public function logout(Security $security): void
     {
         throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');

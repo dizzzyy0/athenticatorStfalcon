@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+{% block title %} 2 factor authentication {% endblock %}
+
+{% block body %}
+    <form method="post" action="{{ path('2fa_login_check') }}">
+        <label for="auth-code">Please enter the code:</label>
+        <input type="text" id="auth-code" name="_auth-code" autofocus />
+        <button type="submit">Confirm</button>
+    </form>
+{% endblock %}

@@ -3,7 +3,7 @@
 {% block title %} Register {% endblock %}
 
 {% block body %}
-    <form action="{{ path('registerProcess') }}" method="post">
+    <form action="{{ path('register-process') }}" method="post">
 
         <h1 class="h3 mb-3 front-weight-normal">Please register</h1>
         <label for="email">Email</label>
@@ -15,9 +15,7 @@
         <label for="passwordConfirm">Confirm password</label>
         <input type="password" name="passwordConfirm" id="passwordConfirm" class="form-control" placeholder="Confirm password" required>
 
-        <p>Already have account? <a href="{{ path('login') }}">Login</a></p>
-
         <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
-
+        <p>Already have account? <a href="{{ path('login') }}">Login</a></p>
     </form>
 {% endblock %}
