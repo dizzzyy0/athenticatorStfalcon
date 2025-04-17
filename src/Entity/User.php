@@ -19,6 +19,9 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFactorInterface
 {
+    const int PERIOD = 30;
+    const int DIGITS = 6;
+
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
@@ -64,14 +67,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     }
 
     /**
-     * A visual identifier that represents this user.
-     *
      * @see UserInterface
+     *
      */
     public function getUserIdentifier(): string
     {
-        assert(trim($this->email) !== '');
-        return $this->email !== '' && $this->email !== '0' ? $this->email : 'not.valid@email.com';
+        return (string) $this->id;
     }
 
     /**
@@ -148,8 +149,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
         return new TotpConfiguration(
             $this->secretKey ?? throw new \RuntimeException('Secret key is not configured'),
             TotpConfiguration::ALGORITHM_SHA1,
-            30,
-            6
+            self::PERIOD,
+            self::DIGITS
         );
     }
 }

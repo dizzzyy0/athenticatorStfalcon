@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -20,14 +21,14 @@ class RegisterUserAction extends AbstractController
     ) {
     }
 
-    #[Route(path: '/auth/register', name: 'register')]
+    #[Route(path: '/auth/register', name: 'register', methods: ['GET'])]
     public function register(): Response
     {
         return $this->render('auth/register.html.twig');
     }
 
-    #[Route('/auth/register/process', name: 'register-process', methods: ['POST'])]
-    public function registerProcess(Request $request, HttpClientInterface $httpClient): Response
+    #[Route('/auth/register/submit', name: 'register-submit', methods: ['POST'])]
+    public function registerSubmit(Request $request, HttpClientInterface $httpClient): Response
     {
         /** @var string $email */
         $email = $request->request->get('email');
@@ -47,18 +48,9 @@ class RegisterUserAction extends AbstractController
 
             return $this->redirectToRoute('login');
 
-        } catch (ClientExceptionInterface $e) {
-
-            $error = json_decode($e->getResponse()->getContent(false), true);
-
-            $message = is_array($error) && isset($error['message']) ? $error['message'] : 'Error during registration';
-
-            $this->addFlash('error', $message);
-
-            return $this->redirectToRoute('register');
-        } catch (\Exception $e) {
-            $this->addFlash('error', 'Undefined error');
-
+        } catch (ValidationFailedException $e) {
+            $message = $e->getViolations()[0]->getMessage();
+            $this->addFlash('danger', $message);
             return $this->redirectToRoute('register');
         }
     }

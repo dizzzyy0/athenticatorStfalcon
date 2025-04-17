@@ -18,23 +18,21 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Component\HttpFoundation\UriSigner;
 
 class TwoFactorAuthenticationAction extends AbstractController
 {
     public function __construct(
       private readonly UserService $userService,
-      private readonly UriSigner $uriSigner
     ){
     }
 
-    #[Route('/2fa', name: 'tow-factor-login')]
+    #[Route('/2fa', name: 'two-factor-login')]
     public function twoFactorAuthentication(): Response
     {
-        return $this->render('towFactorAuth.html.twig');
+        return $this->render('twoFactorAuth.html.twig');
     }
 
-    #[Route('/2fa/enable', name: 'tow-factor-auth-enable', methods: ['POST'])]
+    #[Route('/2fa/enable', name: 'two-factor-auth-enable', methods: ['POST'])]
     public function twoFactorAuthenticationEnable(Request $request, HttpClientInterface $httpClient): Response
     {
         /** @var string $id */
@@ -45,7 +43,7 @@ class TwoFactorAuthenticationAction extends AbstractController
         $uuid = Uuid::fromString($id);
         $success = $this->userService->enableTwoFactorAuthentication($uuid, $password);
         if ($success === true) {
-            $this->addFlash('success', 'Tow factor authentication enable.');
+            $this->addFlash('success', 'two factor authentication enable.');
         } else {
             $this->addFlash('danger', 'Incorrect password. Try again.');
         }
@@ -53,7 +51,7 @@ class TwoFactorAuthenticationAction extends AbstractController
         return $this->redirectToRoute('main');
     }
 
-    #[Route('/2fa/disable', name: 'tow-factor-auth-disable', methods: ['POST'])]
+    #[Route('/2fa/disable', name: 'two-factor-auth-disable', methods: ['POST'])]
     public function twoFactorAuthenticationDisable(Request $request, HttpClientInterface $httpClient): Response
     {
         /** @var string $id */
@@ -64,7 +62,7 @@ class TwoFactorAuthenticationAction extends AbstractController
         $uuid = Uuid::fromString($id);
         $success = $this->userService->disableTwoFactorAuthentication($uuid, $password);
         if ($success === true) {
-            $this->addFlash('success', 'Tow factor authentication disable.');
+            $this->addFlash('success', 'two factor authentication disable.');
         } else {
             $this->addFlash('danger', 'Incorrect password. Try again.');
         }
@@ -78,20 +76,17 @@ class TwoFactorAuthenticationAction extends AbstractController
             writer: new PngWriter(),
             writerOptions: [],
             validateResult: false,
-            data: $this->userService->getUserQrCodeData($id),
+            data: $this->userService->getUserQrCode($id),
             encoding: new Encoding('UTF-8'),
             errorCorrectionLevel: ErrorCorrectionLevel::High,size: 300,
             margin: 10,
             roundBlockSizeMode: RoundBlockSizeMode::Margin,
-            labelText: 'QR code for authentication',
-            labelFont: new OpenSans(15),
-            labelAlignment: LabelAlignment::Center,
             logoResizeToWidth: 50,
             logoPunchoutBackground: true
         );
         $qrCode = $builder->build();
         return new Response(
-            $this->uriSigner->sign($qrCode->getDataUri(), new \DateInterval('P1Y')),
+            $qrCode->getString(),
             Response::HTTP_OK,
             [
                 'content-type' => 'image/png',

@@ -17,7 +17,9 @@ security:
         api_doc:
             pattern: ^/api/doc
             security: false
-            
+        qr:
+            pattern: '2fa/create-qr/'
+            security: false    
         register:
             pattern: 'auth/register'
             security: false
@@ -30,13 +32,12 @@ security:
                 enable_csrf: true
                 default_target_path: main
             two_factor:
-                auth_form_path: tow-factor-login
+                auth_form_path: 2fa_login
                 check_path: 2fa_login_check
             logout:
-                path: appLogout
+                path: logout
                 target: login
-                # where to redirect after logout
-                # target: app_any_route
+
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -48,6 +49,8 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/auth, roles: PUBLIC_ACCESS }
+        - { path: ^/2fa/enable, roles: ROLE_USER }
+        - { path: ^/2fa/disable, roles: ROLE_USER }
         - { path: ^/2fa, roles: IS_AUTHENTICATED_2FA_IN_PROGRESS }
         - { path: ^/, roles: ROLE_USER }
 

@@ -3,8 +3,8 @@
 
 {% block body %}
     <form method="post" action="{{ path('2fa_login_check') }}">
-        <label for="auth-code">Please enter the code:</label>
-        <input type="text" id="auth-code" name="_auth-code" autofocus />
+        <label for="auth_code">Please enter the code:</label>
+        <input type="text" id="auth_code" name="_auth_code" autofocus />
         <button type="submit">Confirm</button>
     </form>
 {% endblock %}

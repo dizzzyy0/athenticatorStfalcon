@@ -6,7 +6,7 @@ namespace App\Controller\UserActions;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class EditUserAction extends AbstractController
+class EditUserProfileAction extends AbstractController
 {
 
 }

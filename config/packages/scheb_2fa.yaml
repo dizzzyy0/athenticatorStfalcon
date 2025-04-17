@@ -7,4 +7,4 @@ scheb_two_factor:
         enabled: true
         server_name: localhost
         issuer: 'AuthApp'
-        template: 'security/towFactorAuth.html.twig'
+        template: 'security/twoFactorAuth.html.twig'

@@ -11,6 +11,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticatorInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 readonly class UserService
 {
@@ -20,26 +22,22 @@ readonly class UserService
         private UserPasswordHasherInterface $passwordHasher,
         private EntityManagerInterface $entityManager,
         private TotpAuthenticatorInterface $totpAuthenticator,
+        private ValidatorInterface $validator,
     ) {
     }
 
-    public function register(RegisterDTO $registerDTO): User
+    public function register(RegisterDTO $registerDTO): void
     {
-        $existingUser = $this->userRepository->findOneBy([
-            'email' => $registerDTO->email,
-        ]);
-        if ($existingUser) {
-            throw new \Exception(sprintf('User with email %s already exists', $registerDTO->email));
+        $constraintValidator = $this->validator->validate($registerDTO);
+        if(count($constraintValidator) > 0){
+            throw new ValidationFailedException($registerDTO,$constraintValidator);
         }
-
         $user = new User();
         $user->setEmail($registerDTO->email);
         $user->setPassword($this->passwordHasher->hashPassword($user, $registerDTO->password));
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
-
-        return $user;
     }
 
     public function getById(Uuid $userId): User
@@ -80,9 +78,12 @@ readonly class UserService
         return true;
     }
 
-    public function getUserQrCodeData(Uuid $uuid): string
+    /**
+     * @throws \Exception
+     */
+    public function getUserQrCode(Uuid $userId): string
     {
-        $user = $this->getById($uuid);
+        $user = $this->getById($userId);
         return $this->totpAuthenticator->getQRContent($user);
     }
 }
