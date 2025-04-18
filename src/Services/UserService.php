@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use Exception;
 use App\DTO\RegisterDTO;
 use App\Entity\User;
 use App\Repository\UserRepository;
@@ -32,6 +33,7 @@ readonly class UserService
         if(count($constraintValidator) > 0){
             throw new ValidationFailedException($registerDTO,$constraintValidator);
         }
+
         $user = new User();
         $user->setEmail($registerDTO->email);
         $user->setPassword($this->passwordHasher->hashPassword($user, $registerDTO->password));
@@ -43,9 +45,10 @@ readonly class UserService
     public function getById(Uuid $userId): User
     {
         $user = $this->userRepository->find($userId);
-        if (! $user) {
-            throw new \Exception(sprintf('User with id %s does not exists', $userId));
+        if ($user === null) {
+            throw new Exception(sprintf('User with id %s does not exists', $userId));
         }
+
         return $user;
     }
 
@@ -79,7 +82,7 @@ readonly class UserService
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function getUserQrCode(Uuid $userId): string
     {

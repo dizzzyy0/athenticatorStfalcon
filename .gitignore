@@ -8,8 +8,11 @@
 /vendor/
 /.env
 /.env.dev
-/compose.override.yaml
 ###< symfony/framework-bundle ###
+
+###> compose ###
+/compose.override.yaml
+###< compose ###
 
 ###> phpstan/phpstan ###
 phpstan.neon

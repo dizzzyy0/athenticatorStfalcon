@@ -2,22 +2,28 @@
 
 declare(strict_types=1);
 
+use Rector\CodingStyle\Rector\Catch_\CatchExceptionNameMatchingTypeRector;
 use Rector\Config\RectorConfig;
+use Rector\Naming\Rector\Assign\RenameVariableToMatchMethodCallReturnTypeRector;
 use Rector\Naming\Rector\Class_\RenamePropertyToMatchTypeRector;
 use Rector\Naming\Rector\ClassMethod\RenameParamToMatchTypeRector;
 
 return RectorConfig::configure()
+    ->withImportNames()
     ->withPaths([
         __DIR__ . '/config',
         __DIR__ . '/public',
         __DIR__ . '/src',
     ])
-    ->withSkip(
-        [
+    ->withSkip([
             RenameParamToMatchTypeRector::class,
             RenamePropertyToMatchTypeRector::class,
-        ]
-    )
+            RenameVariableToMatchMethodCallReturnTypeRector::class,
+            CatchExceptionNameMatchingTypeRector::class,
+    ])
+    ->withSkip([
+        __DIR__.'/config/bundles.php',
+    ])
     ->withPreparedSets(
         deadCode: true,
         codeQuality: true,

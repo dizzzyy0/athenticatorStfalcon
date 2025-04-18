@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
+use RuntimeException;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Scheb\TwoFactorBundle\Model\Totp\TotpConfiguration;
@@ -20,6 +22,7 @@ use Symfony\Component\Uid\Uuid;
 class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFactorInterface
 {
     const int PERIOD = 30;
+
     const int DIGITS = 6;
 
     #[ORM\Id]
@@ -46,7 +49,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     #[ORM\Column]
     private ?string $password = null;
 
-    #[ORM\Column(type: 'string', nullable: true)]
+    #[ORM\Column(type: Types::STRING, nullable: true)]
     private ?string $secretKey;
 
     public function getId(): Uuid
@@ -72,7 +75,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
      */
     public function getUserIdentifier(): string
     {
-        return (string) $this->id;
+        return $this->id->toString();
     }
 
     /**
@@ -147,7 +150,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     public function getTotpAuthenticationConfiguration(): ?TotpConfigurationInterface
     {
         return new TotpConfiguration(
-            $this->secretKey ?? throw new \RuntimeException('Secret key is not configured'),
+            $this->secretKey ?? throw new RuntimeException('Secret key is not configured'),
             TotpConfiguration::ALGORITHM_SHA1,
             self::PERIOD,
             self::DIGITS

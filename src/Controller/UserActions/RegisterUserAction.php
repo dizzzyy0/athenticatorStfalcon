@@ -41,6 +41,7 @@ class RegisterUserAction extends AbstractController
             $this->addFlash('error', 'Passwords do not match.');
             return $this->redirectToRoute('register');
         }
+
         $registerDTO = new RegisterDTO($email, $password);
         try {
             $this->userService->register($registerDTO);

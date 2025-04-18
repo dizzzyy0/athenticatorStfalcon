@@ -42,7 +42,7 @@ class TwoFactorAuthenticationAction extends AbstractController
 
         $uuid = Uuid::fromString($id);
         $success = $this->userService->enableTwoFactorAuthentication($uuid, $password);
-        if ($success === true) {
+        if ($success) {
             $this->addFlash('success', 'two factor authentication enable.');
         } else {
             $this->addFlash('danger', 'Incorrect password. Try again.');
@@ -61,11 +61,12 @@ class TwoFactorAuthenticationAction extends AbstractController
 
         $uuid = Uuid::fromString($id);
         $success = $this->userService->disableTwoFactorAuthentication($uuid, $password);
-        if ($success === true) {
+        if ($success) {
             $this->addFlash('success', 'two factor authentication disable.');
         } else {
             $this->addFlash('danger', 'Incorrect password. Try again.');
         }
+
         return $this->render('main.html.twig');
     }
 
