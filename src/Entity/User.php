@@ -21,36 +21,40 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFactorInterface
 {
-    const int PERIOD = 30;
+    private const int PERIOD = 30;
 
-    const int DIGITS = 6;
+    private const int DIGITS = 6;
 
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
-    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
-    #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
-    protected Uuid $id;
+    private Uuid $id;
 
-    #[ORM\Column(length: 180)]
+
     /**
      * @var non-empty-string
      */
+    #[ORM\Column(length: 180)]
     private string $email;
 
     /**
      * @var list<string> The user roles
      */
-    #[ORM\Column]
+    #[ORM\Column(type: Types::JSON, options: ['jsonb' => true])]
     private array $roles = ['ROLE_USER'];
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
-    private ?string $password = null;
+    private string $password;
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
     private ?string $secretKey;
+
+    public function __construct()
+    {
+        $this->id = Uuid::v7();
+    }
 
     public function getId(): Uuid
     {
@@ -105,7 +109,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     /**
      * @see PasswordAuthenticatedUserInterface
      */
-    public function getPassword(): ?string
+    public function getPassword(): string
     {
         return $this->password;
     }

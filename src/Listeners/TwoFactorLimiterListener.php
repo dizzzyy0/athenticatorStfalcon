@@ -3,13 +3,16 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
+use RuntimeException;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Event\TwoFactorAuthenticationEvent;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 
-#[AsEventListener(event: TwoFactorAuthenticationEvent::class, method: 'onTwoFactorLoginFailure')]
+
+#[AsEventListener(event: RequestEvent::class, method: 'onTwoFactorLoginFailure')]
 final readonly class TwoFactorLimiterListener
 {
     public function __construct(
@@ -17,13 +20,21 @@ final readonly class TwoFactorLimiterListener
       private RateLimiterFactory $twoFactorLimiter,
     ){}
 
-    public function onTwoFactorLoginFailure(TwoFactorAuthenticationEvent $event): void{
-        $user = $event->getToken()->getUser();
-        $limiter = $this->twoFactorLimiter->create($user);
+    public function onTwoFactorLoginFailure(RequestEvent $event): void{
+        $request = $event->getRequest();
+        if ($request->getPathInfo() !== '/2fa_check' || ! $request->isMethod('POST')) {
+            return;
+        }
 
-        if (!$limiter->consume(1)->isAccepted()) {
+        $ip = $request->getClientIp();
+        if ($ip === null) {
+            throw new RuntimeException('IP address is not available.');
+        }
+
+        $limiter = $this->twoFactorLimiter->create($ip);
+
+        if (!$limiter->consume()->isAccepted()) {
             throw new CustomUserMessageAuthenticationException('Too many login attempts. Try later.');
         }
     }
-
 }

@@ -23,23 +23,7 @@ readonly class UserService
         private UserPasswordHasherInterface $passwordHasher,
         private EntityManagerInterface $entityManager,
         private TotpAuthenticatorInterface $totpAuthenticator,
-        private ValidatorInterface $validator,
     ) {
-    }
-
-    public function register(RegisterDTO $registerDTO): void
-    {
-        $constraintValidator = $this->validator->validate($registerDTO);
-        if(count($constraintValidator) > 0){
-            throw new ValidationFailedException($registerDTO,$constraintValidator);
-        }
-
-        $user = new User();
-        $user->setEmail($registerDTO->email);
-        $user->setPassword($this->passwordHasher->hashPassword($user, $registerDTO->password));
-
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
     }
 
     public function getById(Uuid $userId): User

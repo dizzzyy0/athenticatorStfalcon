@@ -8,8 +8,6 @@ use App\Services\UserService;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
-use Endroid\QrCode\Label\Font\OpenSans;
-use Endroid\QrCode\Label\LabelAlignment;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,7 +15,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\Uuid;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class TwoFactorAuthenticationAction extends AbstractController
 {
@@ -29,11 +26,11 @@ class TwoFactorAuthenticationAction extends AbstractController
     #[Route('/2fa', name: 'two-factor-login')]
     public function twoFactorAuthentication(): Response
     {
-        return $this->render('twoFactorAuth.html.twig');
+        return $this->render('security/twoFactorAuth.html.twig');
     }
 
-    #[Route('/2fa/enable', name: 'two-factor-auth-enable', methods: ['POST'])]
-    public function twoFactorAuthenticationEnable(Request $request, HttpClientInterface $httpClient): Response
+    #[Route('enable', name: 'two-factor-auth-enable', methods: ['POST'])]
+    public function twoFactorAuthenticationEnable(Request $request): Response
     {
         /** @var string $id */
         $id = $request->request->get('id');
@@ -51,8 +48,8 @@ class TwoFactorAuthenticationAction extends AbstractController
         return $this->redirectToRoute('main');
     }
 
-    #[Route('/2fa/disable', name: 'two-factor-auth-disable', methods: ['POST'])]
-    public function twoFactorAuthenticationDisable(Request $request, HttpClientInterface $httpClient): Response
+    #[Route('disable', name: 'two-factor-auth-disable', methods: ['POST'])]
+    public function twoFactorAuthenticationDisable(Request $request): Response
     {
         /** @var string $id */
         $id = $request->request->get('id');
@@ -70,7 +67,7 @@ class TwoFactorAuthenticationAction extends AbstractController
         return $this->render('main.html.twig');
     }
 
-    #[Route('/2fa/create-qr/{id}', name:'create-qr', methods: ['GET'])]
+    #[Route('/2fa/create-qr/{id}', name:'create_qr', methods: ['GET'])]
     public function createQR(Uuid $id): Response
     {
         $builder = new Builder(

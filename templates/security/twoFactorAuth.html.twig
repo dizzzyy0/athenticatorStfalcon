@@ -4,7 +4,7 @@
 {% block body %}
     {% if app.session and app.session.get('_security.last_error') %}
         <div class="alert alert-danger">
-            {{ app.session.get('_security.last_error').messageKey}
+            {{ app.session.get('_security.last_error').messageKey}}
         </div>
     {% endif %}
 

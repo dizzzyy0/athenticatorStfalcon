@@ -2,9 +2,9 @@ framework:
     rate_limiter:
         login:
             policy: 'sliding_window'
-            limit: 5
+            limit: 2
             interval: '1 minute'
         two_factor_login:
             policy: 'sliding_window'
-            limit: 5
+            limit: 2
             interval: '1 minute'
