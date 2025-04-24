@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Services\EncryptionService;
+use DateTime;
 use Doctrine\DBAL\Types\Types;
+use LogicException;
 use RuntimeException;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
@@ -18,7 +21,6 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
-#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFactorInterface
 {
     private const int PERIOD = 30;
@@ -51,6 +53,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     #[ORM\Column(type: Types::STRING, nullable: true)]
     private ?string $secretKey;
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private DateTime $lastLogin;
+
+    #[ORM\Column(nullable: true)]
+    private ?string $picturePath;
+
     public function __construct()
     {
         $this->id = Uuid::v7();
@@ -79,7 +87,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
      */
     public function getUserIdentifier(): string
     {
-        return $this->id->toString();
+        $id = $this->id->toString();
+
+        if (empty($id)) {
+            throw new LogicException("User Id can't be empty");
+        }
+
+        return $id;
     }
 
     /**
@@ -153,11 +167,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
 
     public function getTotpAuthenticationConfiguration(): ?TotpConfigurationInterface
     {
+        /** @var string $key */
+        $key = $_ENV['ENCRYPTION_KEY'] ?? '';
+        $encryptedSecret = new EncryptionService($key);
         return new TotpConfiguration(
-            $this->secretKey ?? throw new RuntimeException('Secret key is not configured'),
+            $encryptedSecret->decryptSecret($this->secretKey ?? throw new RuntimeException('Secret key is not configured')),
             TotpConfiguration::ALGORITHM_SHA1,
             self::PERIOD,
             self::DIGITS
         );
+    }
+
+    public function getLastLogin(): ?DateTime
+    {
+        return $this->lastLogin;
+    }
+
+    public function setLastLogin(?DateTime $lastLogin): self{
+        $this->lastLogin = $lastLogin;
+        return $this;
+    }
+
+    public function getPicturePath(): ?string
+    {
+        return $this->picturePath;
+    }
+
+    public function setPicturePath(?string $picturePath): self
+    {
+        $this->picturePath = $picturePath;
+        return $this;
     }
 }

@@ -10,6 +10,7 @@ class UpdateUserDTO
         #[Assert\NotBlank]
         public string $email,
         public ?string $password,
+        public ?string $picturePath,
     ) {
     }
 }

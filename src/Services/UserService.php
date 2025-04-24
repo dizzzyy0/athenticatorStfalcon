@@ -23,6 +23,7 @@ readonly class UserService
         private UserPasswordHasherInterface $passwordHasher,
         private EntityManagerInterface $entityManager,
         private TotpAuthenticatorInterface $totpAuthenticator,
+        private EncryptionService $encryptionService,
     ) {
     }
 
@@ -44,7 +45,7 @@ readonly class UserService
             return false;
         }
 
-        $user->setSecretKey($this->totpAuthenticator->generateSecret());
+        $user->setSecretKey($this->encryptionService->encryptSecret($this->totpAuthenticator->generateSecret()));
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 

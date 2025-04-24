@@ -5,19 +5,19 @@ declare(strict_types=1);
 namespace App\Controller\UserActions;
 
 use App\DTO\RegisterDTO;
+use App\Services\RegisterUserService;
 use App\Services\UserService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+
 
 class RegisterUserAction extends AbstractController
 {
     public function __construct(
-        private readonly UserService $userService,
+        private readonly RegisterUserService $registerUserService,
     ) {
     }
 
@@ -28,7 +28,7 @@ class RegisterUserAction extends AbstractController
     }
 
     #[Route('/auth/register/submit', name: 'register-submit', methods: ['POST'])]
-    public function registerSubmit(Request $request, HttpClientInterface $httpClient): Response
+    public function registerSubmit(Request $request): Response
     {
         /** @var string $email */
         $email = $request->request->get('email');
@@ -44,7 +44,7 @@ class RegisterUserAction extends AbstractController
 
         $registerDTO = new RegisterDTO($email, $password);
         try {
-            $this->userService->register($registerDTO);
+            $this->registerUserService->register($registerDTO);
             $this->addFlash('success', 'Register is successfully. Login to your account.');
 
             return $this->redirectToRoute('login');

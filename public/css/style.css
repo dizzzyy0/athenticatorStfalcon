@@ -334,3 +334,38 @@ p {
         width: 100%;
     }
 }
+/* Add this to your existing CSS file */
+.profile-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius);
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.alert-danger {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+    padding: 0.75rem;
+    border-radius: var(--radius);
+    margin-top: 0.5rem;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.btn-container {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}

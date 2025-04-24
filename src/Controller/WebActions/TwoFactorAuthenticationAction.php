@@ -13,17 +13,24 @@ use Endroid\QrCode\Writer\PngWriter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\UriSigner;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Uid\Uuid;
 
 class TwoFactorAuthenticationAction extends AbstractController
 {
+
+
     public function __construct(
       private readonly UserService $userService,
+      private readonly TokenStorageInterface $tokenStorage,
+      private readonly UriSigner $uriSigner,
     ){
     }
 
-    #[Route('/2fa', name: 'two-factor-login')]
+    #[Route('/2fa', name: 'two-factor-login', methods: ['GET'])]
     public function twoFactorAuthentication(): Response
     {
         return $this->render('security/twoFactorAuth.html.twig');
@@ -32,13 +39,15 @@ class TwoFactorAuthenticationAction extends AbstractController
     #[Route('enable', name: 'two-factor-auth-enable', methods: ['POST'])]
     public function twoFactorAuthenticationEnable(Request $request): Response
     {
-        /** @var string $id */
-        $id = $request->request->get('id');
+        if ($this->tokenStorage->getToken() instanceof TokenInterface) {
+            $uuidId = Uuid::fromString($this->tokenStorage->getToken()->getUserIdentifier());
+        } else {
+            return new Response(status: 401);
+        }
         /** @var string $password */
         $password = $request->request->get('password');
 
-        $uuid = Uuid::fromString($id);
-        $success = $this->userService->enableTwoFactorAuthentication($uuid, $password);
+        $success = $this->userService->enableTwoFactorAuthentication($uuidId, $password);
         if ($success) {
             $this->addFlash('success', 'two factor authentication enable.');
         } else {
@@ -51,13 +60,16 @@ class TwoFactorAuthenticationAction extends AbstractController
     #[Route('disable', name: 'two-factor-auth-disable', methods: ['POST'])]
     public function twoFactorAuthenticationDisable(Request $request): Response
     {
-        /** @var string $id */
-        $id = $request->request->get('id');
+        if ($this->tokenStorage->getToken() instanceof TokenInterface) {
+            $uuidId = Uuid::fromString($this->tokenStorage->getToken()->getUserIdentifier());
+        } else {
+            return new Response(status: 401);
+        }
+
         /** @var string $password */
         $password = $request->request->get('password');
 
-        $uuid = Uuid::fromString($id);
-        $success = $this->userService->disableTwoFactorAuthentication($uuid, $password);
+        $success = $this->userService->disableTwoFactorAuthentication($uuidId, $password);
         if ($success) {
             $this->addFlash('success', 'two factor authentication disable.');
         } else {
@@ -68,17 +80,17 @@ class TwoFactorAuthenticationAction extends AbstractController
     }
 
     #[Route('/2fa/create-qr/{id}', name:'create_qr', methods: ['GET'])]
-    public function createQR(Uuid $id): Response
+    public function createQR(Uuid $id, Request $request): Response
     {
+        $isValid = $this->uriSigner->checkRequest($request);
+        if (! $isValid) {
+            return new Response(
+                status: 403
+            );
+        }
         $builder = new Builder(
-            writer: new PngWriter(),
-            writerOptions: [],
-            validateResult: false,
             data: $this->userService->getUserQrCode($id),
-            encoding: new Encoding('UTF-8'),
-            errorCorrectionLevel: ErrorCorrectionLevel::High,size: 300,
-            margin: 10,
-            roundBlockSizeMode: RoundBlockSizeMode::Margin,
+            errorCorrectionLevel: ErrorCorrectionLevel::High,
             logoResizeToWidth: 50,
             logoPunchoutBackground: true
         );

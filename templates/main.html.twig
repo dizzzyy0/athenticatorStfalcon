@@ -9,10 +9,23 @@
         <div class="profile-card">
             <div class="profile-content">
                 <div class="user-details">
+                    <img src="{{ asset('uploads/' ~ app.user.picturePath) }}"
+                         alt="Profile picture"
+                         class="profile-image"
+                    >
                     <p>
                         <strong>Email:</strong>
                         {{ app.user.email }}
                     </p>
+                    <p>
+                        <strong>Last login:</strong>
+                        {% if app.user.lastLogin %}
+                            {{ app.user.lastLogin|date('Y-m-d H:i:s', 'Europe/Kiev') }}
+                        {% else %}
+                            No last login
+                        {% endif %}
+                    </p>
+                    <a class="btn btn-warning" href="update-profile/{{ app.user.id }}">Edit</a>
                     <p>
                         <strong>2FA Status:</strong>
                         {% if app.user.totpAuthenticationEnabled %}
@@ -25,7 +38,7 @@
 
                 {% if app.user.totpAuthenticationEnabled %}
                     <div class="qr-container">
-                        <img src="{{ path('create_qr', {'id': app.user.id }) }}">
+                        <img src="{{ url }}">
                     </div>
                 {% endif %}
             </div>
