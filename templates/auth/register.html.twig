@@ -7,13 +7,53 @@
 
         <h1 class="h3 mb-3 front-weight-normal">Please register</h1>
         <label for="email">Email</label>
-        <input type="email" name="email" id="email" class="form-control" placeholder="Email" required autofocus>
+        {% set emailError = null %}
+        {% for error in errors ?? [] %}
+            {% if error.propertyPath == 'email' %}
+                {% set emailError = error %}
+            {% endif %}
+        {% endfor %}
+        <input type="email" name="email" id="email" class="form-control" placeholder="Email" value="{{ emailError.invalidValue?? '' }}" required autofocus>
+
+        {% if emailError %}
+            <div class="alert alert-danger" role="alert">
+                {{ emailError.message }}
+            </div>
+        {% endif %}
 
         <label for="password">Password</label>
-        <input type="password" name="password" id="password" class="form-control" placeholder="Password" required>
+
+        {% set passwordError = null %}
+        {% for error in errors ?? [] %}
+            {% if error.propertyPath == 'password' %}
+                {% set passwordError = error %}
+            {% endif %}
+        {% endfor %}
+
+        <input type="password" name="password" id="password" class="form-control" placeholder="Password" value="{{ passwordError.invalidValue?? '' }}" required>
+
+        {% if passwordError %}
+            <div class="alert alert-danger" role="alert">
+                {{ passwordError.message }}
+            </div>
+        {% endif %}
 
         <label for="passwordConfirm">Confirm password</label>
-        <input type="password" name="passwordConfirm" id="passwordConfirm" class="form-control" placeholder="Confirm password" required>
+
+        {% set passworConfirmError = null %}
+        {% for error in errors ?? [] %}
+            {% if error.propertyPath == 'passwordConfirm' %}
+                {% set passworConfirmError = error %}
+            {% endif %}
+        {% endfor %}
+
+        <input type="password" name="passwordConfirm" id="passwordConfirm" class="form-control" placeholder="Confirm password" value="{{ passworConfirmError.invalidValue?? '' }}" required>
+
+        {% if passworConfirmError %}
+            <div class="alert alert-danger" role="alert">
+                {{ passworConfirmError.message }}
+            </div>
+        {% endif %}
 
         <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
         <p>Already have account? <a href="{{ path('login') }}">Login</a></p>

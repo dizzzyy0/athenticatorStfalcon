@@ -9,7 +9,9 @@ use Rector\Naming\Rector\Class_\RenamePropertyToMatchTypeRector;
 use Rector\Naming\Rector\ClassMethod\RenameParamToMatchTypeRector;
 
 return RectorConfig::configure()
-    ->withImportNames()
+    ->withImportNames(
+        removeUnusedImports: true
+    )
     ->withPaths([
         __DIR__ . '/config',
         __DIR__ . '/public',
