@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\User\UseCases\Login\TwoFactorLogin;
 
-use App\Services\UserService;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\ErrorCorrectionLevel;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -37,6 +36,7 @@ class TwoFactorAuthenticationAction extends AbstractController
     public function twoFactorAuthenticationEnable(Request $request): Response
     {
         if ($this->tokenStorage->getToken() instanceof TokenInterface) {
+            //
             $uuidId = Uuid::fromString($this->tokenStorage->getToken()->getUserIdentifier());
         } else {
             return new Response(status: 401);

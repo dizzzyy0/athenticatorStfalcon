@@ -23,9 +23,6 @@ final class Version20250424095551 extends AbstractMigration
     public function down(Schema $schema): void
     {
         $this->addSql(<<<'SQL'
-            CREATE SCHEMA public
-        SQL);
-        $this->addSql(<<<'SQL'
             ALTER TABLE "user" DROP picture_path
         SQL);
         $this->addSql(<<<'SQL'

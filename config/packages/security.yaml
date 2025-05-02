@@ -7,21 +7,12 @@ security:
         # used to reload user from session & other features (e.g. switch_user)
         app_user_provider:
             entity:
-                class: App\Entity\User
+                class: App\User\User
                 property: email
         # used to reload user from session & other features (e.g. switch_user)
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
-            security: false
-        api_doc:
-            pattern: ^/api/doc
-            security: false
-        qr:
-            pattern: '2fa/create-qr/'
-            security: false    
-        register:
-            pattern: 'auth/register'
             security: false
         main:
             lazy: true
@@ -48,11 +39,13 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        - { path: ^/auth, roles: PUBLIC_ACCESS }
-        - { path: ^/2fa/enable, roles: ROLE_USER }
-        - { path: ^/2fa/disable, roles: ROLE_USER }
-        - { path: ^/2fa, roles: IS_AUTHENTICATED_2FA_IN_PROGRESS }
+        - { route: login, roles: PUBLIC_ACCESS }
+        - { route: register, roles: PUBLIC_ACCESS }
+        - { route: two-factor-login, roles: IS_AUTHENTICATED_2FA_IN_PROGRESS }
+        - { route: two-factor-auth-disable, roles: ROLE_USER }
+        - { route: two-factor-auth-enable, roles: ROLE_USER }
         - { path: ^/, roles: ROLE_USER }
+        
 
 when@test:
     security:
@@ -66,3 +59,7 @@ when@test:
                 cost: 4 # Lowest possible value for bcrypt
                 time_cost: 3 # Lowest possible value for argon
                 memory_cost: 10 # Lowest possible value for argon
+        firewalls:
+            main:
+                form_login:
+                    enable_csrf: false

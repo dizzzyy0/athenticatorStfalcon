@@ -17,8 +17,8 @@ readonly class TwoFactorService
         private  UserPasswordHasherInterface         $passwordHasher,
         private  EntityManagerInterface              $entityManager,
         private  TotpAuthenticatorInterface $totpAuthenticator,
-        private  EncryptionService                   $encryptionService,
     ){}
+
     public function enableTwoFactorAuthentication(Uuid $userId, string $password): bool
     {
         $user = $this->userRepository->findOneById($userId);
@@ -27,7 +27,8 @@ readonly class TwoFactorService
             return false;
         }
 
-        $user->setSecretKey($this->encryptionService->encryptSecret($this->totpAuthenticator->generateSecret()));
+//        $user->setSecretKey($this->encryptionService->encryptSecret($this->totpAuthenticator->generateSecret()));
+        $user->setSecretKey($this->totpAuthenticator->generateSecret());
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
@@ -36,7 +37,7 @@ readonly class TwoFactorService
 
     public function disableTwoFactorAuthentication(Uuid $userId, string $password): bool
     {
-        $user = $this->$this->userRepository->findOneById($userId);
+        $user = $this->userRepository->findOneById($userId);
         $isValidPassword = $this->passwordHasher->isPasswordValid($user, $password);
         if (! $isValidPassword){
             return false;

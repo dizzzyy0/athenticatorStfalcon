@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\User;
 
 use App\User\Support\UserRepository;
-use App\User\UseCases\Login\TwoFactorLogin\EncryptionService;
+use App\User\UseCases\Login\TwoFactorLogin\Type\SecretKeyType;
 use DateTime;
+use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use LogicException;
-use RuntimeException;
 use Scheb\TwoFactorBundle\Model\Totp\TotpConfiguration;
 use Scheb\TwoFactorBundle\Model\Totp\TotpConfigurationInterface;
 use Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface;
@@ -20,7 +20,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: 'user')]
+#[ORM\Table(name: '`user`')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFactorInterface
 {
     private const int PERIOD = 30;
@@ -50,11 +50,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     #[ORM\Column]
     private string $password;
 
-    #[ORM\Column(type: Types::STRING, nullable: true)]
+    #[ORM\Column(type: SecretKeyType::NAME, nullable: true)]
     private ?string $secretKey;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private DateTime $lastLogin;
+    #[ORM\Column(type: Types::DATE_IMMUTABLE, nullable: true)]
+    private ?DateTimeImmutable  $lastLogin;
 
     #[ORM\Column(nullable: true)]
     private ?string $picturePath;
@@ -167,24 +167,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
 
     public function getTotpAuthenticationConfiguration(): ?TotpConfigurationInterface
     {
-        /** @var string $key */
-        $key = $_ENV['ENCRYPTION_KEY'] ?? throw new LogicException('Encryption key is not configured');
-        $encryptionService = new EncryptionService($key);
-        $decryptedSecret = $encryptionService->decryptSecret($this->secretKey ?? throw new RuntimeException('Secret key is not configured'));
+//        /** @var string $key */
+//        $key = $_ENV['ENCRYPTION_KEY'] ?? ;
+//        $encryptionService = new EncryptionService($key);
+//        $decryptedSecret = $encryptionService->decryptSecret($this->secretKey ?? throw new RuntimeException('Secret key is not configured'));
         return new TotpConfiguration(
-            $decryptedSecret,
+            $this->getSecretKey()??throw new LogicException('Encryption key is not configured'),
             TotpConfiguration::ALGORITHM_SHA1,
             self::PERIOD,
             self::DIGITS
         );
     }
 
-    public function getLastLogin(): ?DateTime
+    public function getLastLogin(): ?DateTimeImmutable
     {
         return $this->lastLogin;
     }
 
-    public function setLastLogin(?DateTime $lastLogin): self{
+    public function setLastLogin(?DateTimeImmutable  $lastLogin): self
+    {
         $this->lastLogin = $lastLogin;
         return $this;
     }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\User\UseCases\Login;
 
 use App\User\Support\UserRepository;
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Uid\Uuid;
 
@@ -17,7 +17,7 @@ readonly class UpdateLastLoginService
 
     public function updateUserLogin(Uuid $userId): void {
         $user = $this->userRepository->findOneById($userId);
-        $user->setLastLogin(Carbon::now());
+        $user->setLastLogin(CarbonImmutable::now()->toDateTimeImmutable());
         $this->entityManager->persist($user);
         $this->entityManager->flush();
     }

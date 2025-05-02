@@ -6,6 +6,7 @@
 /public/bundles/
 /var/
 /vendor/
+/.jwt
 ###< symfony/framework-bundle ###
 
 ###> compose ###
@@ -25,7 +26,3 @@ phpstan.neon
 /phpunit.xml
 ###< symfony/phpunit-bridge ###
 
-###> phpunit/phpunit ###
-/phpunit.xml
-.phpunit.result.cache
-###< phpunit/phpunit ###

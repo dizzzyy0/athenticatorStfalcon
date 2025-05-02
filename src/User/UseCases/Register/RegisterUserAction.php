@@ -44,5 +44,7 @@ class RegisterUserAction extends AbstractController
                 'errors' => $errors,
             ]);
         }
+
+        return $this->redirectToRoute('login');
     }
 }
