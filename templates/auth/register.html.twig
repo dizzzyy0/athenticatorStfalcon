@@ -1,0 +1,61 @@
+{% extends 'base.html.twig'%}
+
+{% block title %} {{ 'register.twig.register' | trans }} {% endblock %}
+
+{% block body %}
+    <form action="{{ path('register_submit') }}" method="post">
+
+        <h1 class="h3 mb-3 front-weight-normal">{{'register.twig.please_register' | trans }}</h1>
+        <label for="email">{{ 'general_twig.email' | trans }}</label>
+        {% set emailError = null %}
+        {% for error in errors ?? [] %}
+            {% if error.propertyPath == 'email' %}
+                {% set emailError = error %}
+            {% endif %}
+        {% endfor %}
+        <input type="email" name="email" id="email" class="form-control" placeholder="{{ 'general_twig.email' | trans }}" value="{{ emailError.invalidValue?? '' }}" required autofocus>
+
+        {% if emailError %}
+            <div class="alert alert-danger" role="alert">
+                {{ emailError.message }}
+            </div>
+        {% endif %}
+
+        <label for="password">{{ 'general_twig.password' | trans }}</label>
+
+        {% set passwordError = null %}
+        {% for error in errors ?? [] %}
+            {% if error.propertyPath == 'password' %}
+                {% set passwordError = error %}
+            {% endif %}
+        {% endfor %}
+
+        <input type="password" name="password" id="password" class="form-control" placeholder="{{ 'general_twig.password' | trans }}" value="{{ passwordError.invalidValue?? '' }}" required>
+
+        {% if passwordError %}
+            <div class="alert alert-danger" role="alert">
+                {{ passwordError.message }}
+            </div>
+        {% endif %}
+
+        <label for="passwordConfirm">{{ 'general_twig.password_confirm' | trans }}</label>
+
+        {% set passworConfirmError = null %}
+        {% for error in errors ?? [] %}
+            {% if error.propertyPath == 'passwordConfirm' %}
+                {% set passworConfirmError = error %}
+            {% endif %}
+        {% endfor %}
+
+        <input type="password" name="passwordConfirm" id="passwordConfirm" class="form-control" placeholder="{{ 'general_twig.password_confirm' | trans }}" value="{{ passworConfirmError.invalidValue?? '' }}" required>
+
+        {% if passworConfirmError %}
+            <div class="alert alert-danger" role="alert">
+                {{ passworConfirmError.message }}
+            </div>
+        {% endif %}
+
+        <button class="btn btn-lg btn-primary btn-block" type="submit">{{ 'register.twig.register' | trans }}</button>
+        <p>{{ 'general_twig.have_account' | trans }} <a href="{{ path('login') }}">{{ 'login.twig.login' | trans }}</a></p>
+    </form>
+{% endblock %}

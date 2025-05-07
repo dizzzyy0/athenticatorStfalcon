@@ -1,0 +1,107 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'twig_profile.title' | trans }}{% endblock %}
+
+{% block body %}
+    <div class="user-profile">
+        <h1>{{ 'twig_profile.title' | trans }}</h1>
+
+        <div class="profile-card">
+            <div class="profile-content">
+                <div class="user-details">
+                    <img src="{{ asset('uploads/' ~ app.user.picturePath) }}"
+                         alt="Profile picture"
+                         class="profile-image"
+                    >
+                    <p>
+                        <strong>{{ 'general_twig.email' | trans }}:</strong>
+                        {{ app.user.email }}
+                    </p>
+                    <p>
+                        <strong>Last login:</strong>
+                        {% if app.user.lastLogin %}
+                            {{ app.user.lastLogin|date('Y-m-d H:i:s', 'Europe/Kiev') }}
+                        {% else %}
+                            {{ 'errors.no_last_login' | trans }}
+                        {% endif %}
+                    </p>
+                    <a class="btn btn-warning" href="update-profile/{{ app.user.id }}">{{ 'general_twig.edit' | trans }}</a>
+                    <p>
+                        <strong>2FA Status:</strong>
+                        {% if app.user.totpAuthenticationEnabled %}
+                            <span class="status enabled">{{ 'general_twig.enabled' | trans }}</span>
+                        {% else %}
+                            <span class="status disabled">{{ 'general_twig.disabled' | trans }}</span>
+                        {% endif %}
+                    </p>
+                </div>
+
+                {% if app.user.totpAuthenticationEnabled %}
+                    <div class="qr-container">
+                        <img src="{{ url }}">
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="btn-container">
+            {% if app.user.totpAuthenticationEnabled %}
+                <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#twoFAModal">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6 6 18"></path><path d="m6 6 12 12"></path>
+                    </svg>
+                    {{ 'twig_profile.disable_2fa' | trans }}
+                </button>
+            {% else %}
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#twoFAModal">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"></path>
+                        <path d="M12 8v8"></path>
+                        <path d="M8 12h8"></path>
+                    </svg>
+                    {{ 'twig_profile.enable_2fa' | trans }}
+                </button>
+            {% endif %}
+        </div>
+
+        <div class="modal fade" id="twoFAModal" tabindex="-1" aria-labelledby="twoFAModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    {% set formAction = app.user.totpAuthenticationEnabled ? path('disable') : path('enable') %}
+                    {% set tokenIntention = app.user.totpAuthenticationEnabled ? 'disable' : 'enable' %}
+                    <form method="post" action="{{ formAction }}">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="twoFAModalLabel">{{ 'twig_profile.confirm_password' | trans }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>To {{ app.user.totpAuthenticationEnabled ? 'disable' : 'enable' }} {{ 'twig_profile.two_factor' | trans }}:</p>
+                            <div class="mb-3">
+                                <input type="password" id="password" name="password" class="form-control" required placeholder="{{ 'twig_profile.enter_password' | trans }}">
+                            </div>
+                            <input type="hidden" id="id" name="id" value="{{ app.user.id }}">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ 'general_twig.cancel' | trans }}</button>
+                            {% set buttonClass = app.user.totpAuthenticationEnabled ? 'btn-danger' : 'btn-success' %}
+                            {% set buttonText = app.user.totpAuthenticationEnabled ? 'Disable 2FA' : 'Enable 2FA' %}
+                            <button type="submit" class="btn {{ buttonClass }}">{{ buttonText }}</button>
+                        </div>
+                        <input type="hidden" name="_token" value="{{ csrf_token(tokenIntention) }}">
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="logout-link">
+            <a href="{{ path('logout') }}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                {{ 'twig_profile.logout' | trans }}
+            </a>
+        </div>
+    </div>
+{% endblock %}

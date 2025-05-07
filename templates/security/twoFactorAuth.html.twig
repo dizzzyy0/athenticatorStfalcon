@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+{% block title %} {{ 'two_factor.twig.two_factor_form' | trans }} {% endblock %}
+
+{% block body %}
+    {% if app.session and app.session.get('_security.last_error') %}
+        <div class="alert alert-danger">
+            {{ app.session.get('_security.last_error').messageKey}}
+        </div>
+    {% endif %}
+
+    <form method="post" action="{{ path('2fa_login_check') }}">
+         <label for="auth_code">{{ 'two_factor.twig.enter_code' | trans }}</label>
+        <input type="text" id="auth_code" name="_auth_code" autofocus />
+        <button type="submit">{{ 'general_twig.confirm' | trans }}</button>
+    </form>
+{% endblock %}
