@@ -18,7 +18,6 @@ readonly class UpdateLastLoginService
     public function updateUserLogin(Uuid $userId): void {
         $user = $this->userRepository->findOneById($userId);
         $user->setLastLogin(CarbonImmutable::now()->toDateTimeImmutable());
-        $this->entityManager->persist($user);
         $this->entityManager->flush();
     }
 }

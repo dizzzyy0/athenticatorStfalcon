@@ -9,12 +9,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 class RegisterUserAction extends AbstractController
 {
     public function __construct(
         private readonly RegisterUserService $registerUserService,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -24,7 +26,7 @@ class RegisterUserAction extends AbstractController
         return $this->render('auth/register.html.twig');
     }
 
-    #[Route('/register', name: 'register-submit', methods: ['POST'])]
+    #[Route('/register', name: 'register_submit', methods: ['POST'])]
     public function registerSubmit(Request $request): Response
     {
         /** @var string $email */
@@ -37,7 +39,7 @@ class RegisterUserAction extends AbstractController
         $registerDTO = new RegisterDTO($email, $password, $passwordConfirm);
         try {
             $this->registerUserService->register($registerDTO);
-            $this->addFlash('success', 'Register is successfully. Login to your account.');
+            $this->addFlash('success', $this->translator->trans('register.success'));
         } catch (ValidationFailedException $e) {
             $errors = $e->getViolations();
             return $this->render('auth/register.html.twig', [

@@ -21,7 +21,7 @@ final class Version20250502100404 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
-
+        // this migration could not be safely reverted
         $this->addSql(<<<'SQL'
             ALTER TABLE "user" ALTER secret_key SET NOT NULL
         SQL);

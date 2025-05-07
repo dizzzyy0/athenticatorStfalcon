@@ -37,7 +37,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->flush();
     }
 
-    public function findOneById(Uuid $userId): ?User{
+    public function findOneById(Uuid $userId): User{
         return $this->find($userId) ?? throw new RuntimeException();
     }
 }

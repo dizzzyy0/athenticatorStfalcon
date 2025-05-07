@@ -6,9 +6,11 @@ namespace App\User\UseCases\Login\Listeners;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Http\Event\LoginFailureEvent;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 #[AsEventListener(event: LoginFailureEvent::class, method: 'onLoginFailure')]
@@ -16,9 +18,9 @@ final readonly class LoginLimiterListener
 {
 
     public function __construct(
-        #[Autowire(service: 'limiter.login')]
+        #[Autowire( '@limiter.login')]
         private RateLimiterFactory $loginLimiter,
-        private LoggerInterface $logger,
+        private TranslatorInterface $translator,
     ){}
 
     public function onLoginFailure(LoginFailureEvent $event): void{
@@ -27,9 +29,8 @@ final readonly class LoginLimiterListener
         $ip = $request->getClientIp();
         $limiter = $this->loginLimiter->create($ip);
 
-        $this->logger->info('LoginEventListener triggered');
         if (!$limiter->consume()->isAccepted()) {
-            throw new CustomUserMessageAuthenticationException('Too many login attempts. Try later.');
+            throw new TooManyRequestsHttpException($this->translator->trans('login.login_failure'));
         }
     }
 }

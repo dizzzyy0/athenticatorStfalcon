@@ -20,6 +20,7 @@ class UserFixture extends Fixture
         $registerDto = new RegisterDto(
             'example@gmail.com',
             'example',
+            'example'
         );
         $this->registerService->register($registerDto);
     }

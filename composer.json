@@ -77,6 +77,14 @@
         "post-update-cmd": [
             "@auto-scripts"
         ],
+        "app:recreate-database": [
+            "bin/console doctrine:database:create --if-not-exists",
+            "bin/console doctrine:migrations:migrate --no-interaction first",
+            "bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration",
+            "bin/console doctrine:fixtures:load --no-interaction",
+            "bin/console doctrine:schema:validate",
+            "echo DONE @no_additional_args"
+        ],
         "ci:pack": [
             "@ci:ecs",
             "@ci:rector",

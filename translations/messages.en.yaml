@@ -1,0 +1,60 @@
+errors:
+    existing_email: This email already exist
+    must_be_string: Value must be a string
+    no_last_login: No last login
+
+    
+update_profile:
+    success: Profile updated successfully
+    twig:
+        update_form: Profile Edit
+    
+login:
+    logout_error: This method can be blank - it will be intercepted by the logout key on your firewall
+    login_failure: Too many login attempts. Try later
+    twig:
+        login_form: Log in!
+        login: Log in
+        please_sign_in: Please sign in
+    
+two_factor:
+    success_disable: Two factor authentication disable 
+    danger: Incorrect password. Try again
+    success_enable: Two factor authentication enable
+    ip_not_available: IP address is not available
+    twig:
+        two_factor_form: 2 factor authentication
+        enter_code: Please enter the code
+    
+register:
+    success: Register is successfully. Login to your account
+    twig:
+        register: Register
+        please_register: Please register
+
+general_twig:
+    email: Email
+    password: Password
+    password_confirm: Confirm password
+    does_not_have_account: Does not have account?
+    have_account: Already have account?
+    confirm: Confirm
+    save: Save
+    go_back: Go back
+    profile_picture: Profile picture
+    authentication: Authentication
+    edit: Edit
+    enabled: Enabled
+    disabled: Disabled
+    cancel: Cancel
+    
+twig_profile:
+    title: User Profile
+    enable_2fa: Enable 2FA
+    disable_2fa: Disable 2FA
+    confirm_password: Confirm your password
+    two_factor:  two-factor authentication, please enter your password
+    enter_password:  Please enter your password
+    logout: Logout
+    
+    

@@ -18,12 +18,12 @@ class ProfilePageAction extends AbstractController
     ) {
     }
 
-    #[Route(path: '/main', name: 'main')]
-    public function main(): Response
+    #[Route(path: '/profile', name: 'profile')]
+    public function profile(): Response
     {
         $id = $this->tokenStorage->getToken()?->getUserIdentifier();
         $qrCodeUrl = $this->urlGenerator->generate(
-            'create_qr',
+            'generate_qr',
             [
                 'id' => $id,
             ],
@@ -32,7 +32,7 @@ class ProfilePageAction extends AbstractController
 
         $signedUrl = $this->uriSigner->sign($qrCodeUrl);
         return $this->render(
-            'main.html.twig',
+            'profile.html.twig',
             [
                 'url' => $signedUrl,
             ]

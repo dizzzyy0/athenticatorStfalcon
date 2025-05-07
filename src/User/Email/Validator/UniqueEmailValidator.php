@@ -11,12 +11,14 @@ use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class UniqueEmailValidator extends ConstraintValidator
 {
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly TokenStorageInterface $tokenStorage,
+        private readonly TranslatorInterface $translator,
     ){
     }
     public function validate(mixed $value, Constraint $constraint): void{
@@ -30,7 +32,7 @@ class UniqueEmailValidator extends ConstraintValidator
         }
 
         if(!is_string($value) ){
-            throw new InvalidArgumentException('Value must be a string');
+            throw new InvalidArgumentException($this->translator->trans('errors.must_be_string'));
         }
 
         $currentUserToken = $this->tokenStorage->getToken();
@@ -47,7 +49,7 @@ class UniqueEmailValidator extends ConstraintValidator
             ['email' => $value]
         );
         if($user !== null){
-            $this->context->buildViolation('This email already exist')->addViolation();
+            $this->context->buildViolation($this->translator->trans('errors.existing_email'))->addViolation();
         }
 
     }

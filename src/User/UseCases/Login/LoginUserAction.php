@@ -6,13 +6,16 @@ namespace App\User\UseCases\Login;
 
 use LogicException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LoginUserAction extends AbstractController
 {
     public function __construct(
+        private readonly TranslatorInterface $translator,
     ){}
 
     #[Route(path: '/login', name: 'login')]
@@ -31,6 +34,6 @@ class LoginUserAction extends AbstractController
     #[Route(path: '/logout', name: 'logout', methods: ['GET'])]
     public function logout(): void
     {
-        throw new LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
+        throw new LogicException($this->translator->trans('login.logout_error'));
     }
 }

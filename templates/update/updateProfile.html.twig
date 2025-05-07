@@ -1,21 +1,21 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Profile Edit{% endblock %}
+{% block title %}{{ 'update_profile.twig.update_form' | trans }}{% endblock %}
 
 {% block body %}
     <div class="user-profile">
-        <h1>Profile Edit</h1>
+        <h1>{{ 'update_profile.twig.update_form' | trans }}</h1>
 
         <div class="profile-card">
             <div class="profile-content">
                 <div class="user-details">
                     <img src="{{ asset('uploads/' ~ user.picturePath) }}"
-                         alt="Profile picture"
+                         alt="{{ 'general_twig.profile_picture' | trans }}"
                          class="profile-image">
 
                     <form action="{{ path('update_profile_submit', { userId: user.id }) }}" method="post" enctype="multipart/form-data">
                         <div class="form-group">
-                            <label for="email">Email:</label>
+                            <label for="email">{{ 'general_twig.email' | trans }}:</label>
                             {% set emailError = null %}
                             {% for error in errors ?? [] %}
                                 {% if error.propertyPath == 'email' %}
@@ -23,7 +23,7 @@
                                 {% endif %}
                             {% endfor %}
 
-                            <input type="email" name="email" id="email" class="form-control" placeholder="Email" value="{{ emailError.invalidValue?? user.email }}" required autofocus>
+                            <input type="email" name="email" id="email" class="form-control" placeholder="{{ 'general_twig.email' | trans }}" value="{{ emailError.invalidValue?? user.email }}" required autofocus>
 
                             {% if emailError %}
                                 <div class="alert alert-danger" role="alert">
@@ -33,18 +33,18 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="password">Password</label>
+                            <label for="password">{{ 'general_twig.password' | trans }}</label>
                             <input type="password" id="password" name="password" class="form-control">
                         </div>
 
                         <div class="form-group">
-                            <label for="profile_picture">Profile picture</label>
+                            <label for="profile_picture">{{ 'general_twig.profile_picture' | trans }}</label>
                             <input type="file" id="profile_picture" name="profile_picture" accept="image/*" class="form-control">
                         </div>
 
                         <div class="btn-container">
-                            <button type="submit" class="btn btn-success">Save</button>
-                            <a class="btn btn-secondary" href="{{path ('main') }}">Go back</a>
+                            <button type="submit" class="btn btn-success">{{ 'general_twig.save' | trans }}</button>
+                            <a class="btn btn-secondary" href="{{path ('profile') }}">{{ 'general_twig.go_back' | trans }}</a>
                         </div>
                     </form>
                 </div>

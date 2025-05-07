@@ -27,7 +27,6 @@ readonly class TwoFactorService
             return false;
         }
 
-//        $user->setSecretKey($this->encryptionService->encryptSecret($this->totpAuthenticator->generateSecret()));
         $user->setSecretKey($this->totpAuthenticator->generateSecret());
         $this->entityManager->persist($user);
         $this->entityManager->flush();

@@ -23,9 +23,9 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\Table(name: '`user`')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFactorInterface
 {
-    private const int PERIOD = 30;
+    private const int TOTP_PERIOD = 30;
 
-    private const int DIGITS = 6;
+    private const int TOTP_DIGITS = 6;
 
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME)]
@@ -167,15 +167,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
 
     public function getTotpAuthenticationConfiguration(): ?TotpConfigurationInterface
     {
-//        /** @var string $key */
-//        $key = $_ENV['ENCRYPTION_KEY'] ?? ;
-//        $encryptionService = new EncryptionService($key);
-//        $decryptedSecret = $encryptionService->decryptSecret($this->secretKey ?? throw new RuntimeException('Secret key is not configured'));
-        return new TotpConfiguration(
-            $this->getSecretKey()??throw new LogicException('Encryption key is not configured'),
+       return new TotpConfiguration(
+            $this->getSecretKey() ?? throw new LogicException('Encryption key is not configured'),
             TotpConfiguration::ALGORITHM_SHA1,
-            self::PERIOD,
-            self::DIGITS
+            self::TOTP_PERIOD,
+            self::TOTP_DIGITS
         );
     }
 
